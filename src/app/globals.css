@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 :root {
+  --primary-color: #3b77b9;
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
@@ -30,4 +31,13 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+.sidebar-btn-menu {
+  color: lightgray;
+}
+
+.sidebar-btn-menu--active {
+  color: var(--primary-color);
+  border-right: 1px solid var(--primary-color);
 }
