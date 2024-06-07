@@ -6,7 +6,8 @@
 enum Paths {
   // Pages
   Root = '/',
-  Dashboard = '/dashboard',
+  Dashboard = '/home/dashboard',
+  OtherPage = '/home/otherPage'
 }
 
 export default Paths
