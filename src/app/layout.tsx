@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import UseQueryProvider from "./providers/useQueryProvider/UseQueryProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,7 +17,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="dark">{children}</body>
+      <body className="dark">
+        <UseQueryProvider>
+          {children}
+        </UseQueryProvider>
+      </body>
     </html>
   );
 }
