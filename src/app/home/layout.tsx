@@ -9,7 +9,7 @@ function HomeLayout({
   return (
     <div className="flex min-h-screen">
       <SideBarComponent />
-      <section className="flex-1">
+      <section className="flex-1 p-5">
         {children}
       </section>
     </div>
