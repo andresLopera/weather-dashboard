@@ -1,5 +1,10 @@
-import { Button, Input } from "@nextui-org/react"
+'use client'
+
+import { Button, Card, CardBody, Input } from "@nextui-org/react"
 import { MdOutlineBookmark, MdOutlineImageSearch, MdOutlineSearch } from "react-icons/md"
+import { useMutation } from '@tanstack/react-query';
+import WeatherService from "@/services/weatherService";
+import { useEffect, useState } from "react";
 
 interface IDashboardContainerProps {
 
@@ -25,6 +30,45 @@ const TopSection = () => {
 
 
 const DashboardContainer = (props: IDashboardContainerProps) => {
+    const weatherService = new WeatherService()
+    const [airPollution, setAirPollution] = useState({})
+    const [forecast, setForecast] = useState({})
+
+    const {
+        mutate: getAirPollution,
+        isPending: isGetPollutionPending,
+    } = useMutation({
+        mutationFn: () => {
+            return weatherService.getAirPollution({ lat: '', lon: '', start: '', end: '' })
+        },
+        onSuccess: (result) => {
+            console.log('success andres', result)
+            setAirPollution(result)
+        },
+        onError: () => {
+            alert('error')
+        },
+    });
+
+    const {
+        mutate: getForecast,
+        isPending: isForecastPending,
+    } = useMutation({
+        mutationFn: () => {
+            return weatherService.getForecast({ lat: '', lon: '' })
+        },
+        onSuccess: (result) => {
+            setForecast(result)
+        },
+        onError: () => {
+            alert('error')
+        },
+    });
+
+    useEffect(() => {
+        getAirPollution()
+        getForecast()
+    }, [])
 
 
     return (
