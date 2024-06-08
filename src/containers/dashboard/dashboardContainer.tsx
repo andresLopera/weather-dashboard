@@ -94,7 +94,34 @@ const ForecastTable = (data: any, loading: boolean) => {
 
 const DashboardContainer = (props: IDashboardContainerProps) => {
     const weatherService = new WeatherService()
-    const [airPollution, setAirPollution] = useState({})
+    const [airPollutionGraph, setAirPollutionGraph] = useState({
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                animation: false
+            }
+        },
+        xAxis: {
+            type: 'category',
+            name: 'Days',
+            splitLine: { show: false },
+        },
+        yAxis: {
+            type: 'log',
+            name: '',
+            minorSplitLine: {
+                show: false
+            }
+        },
+        series: [
+            {
+                name: 'Fake Data',
+                type: 'line',
+                showSymbol: false,
+                data: []
+            }
+        ]
+    })
     const [forecastDataTable, setForecastDataTable] = useState<[]>()
     const [forecastDataGraph, setForecastDataGraph] = useState<any>({
         tooltip: {
@@ -157,12 +184,11 @@ const DashboardContainer = (props: IDashboardContainerProps) => {
         mutationFn: () => {
             return weatherService.getAirPollution({ lat: '', lon: '', start: '', end: '' })
         },
-        onSuccess: (result) => {
-            console.log('success andres', result)
-            setAirPollution(result)
+        onSuccess: (result: any) => {
+            proccessDataAirPollution(result)
         },
         onError: () => {
-            alert('error')
+            console.log('error')
         },
     });
 
@@ -177,7 +203,7 @@ const DashboardContainer = (props: IDashboardContainerProps) => {
             proccessDataForecast(result)
         },
         onError: () => {
-            alert('error')
+            console.log('error')
         },
     });
 
@@ -188,7 +214,7 @@ const DashboardContainer = (props: IDashboardContainerProps) => {
 
 
     const proccessDataForecast = (forecast: any) => {
-        let data = forecast.list
+        let data = forecast?.list || []
         let transformData: any = {}
         data.forEach(({ dt_txt, pop, main, clouds, weather }: any) => {
             let day = getDayOfWeek(dt_txt)
@@ -272,15 +298,63 @@ const DashboardContainer = (props: IDashboardContainerProps) => {
         setForecastDataTable(data)
     }
 
+    const proccessDataAirPollution = (airPollution: any) => {
+        let data = airPollution?.list || []
+        let transformData: any = {
+            co: [],
+            no: [],
+            no2: [],
+            o3: [],
+            so2: [],
+            pm2_5: [],
+            pm10: [],
+            nh3: []
+        }
+
+        data.forEach(({ dt, components }: any) => {
+            Object.keys(components).forEach(key => {
+                transformData[key].push(components[key])
+            })
+        })
+
+        let series: any = [{
+            name: 'no2',
+            type: 'line',
+            showSymbol: false,
+            data: transformData['no2']
+        }, {
+            name: 'pm10',
+            type: 'line',
+            showSymbol: false,
+            data: transformData['pm10']
+        }, {
+            name: 'o3',
+            type: 'line',
+            showSymbol: false,
+            data: transformData['o3']
+        }, {
+            name: 'so2',
+            type: 'line',
+            showSymbol: false,
+            data: transformData['so2']
+        }]
+
+        setAirPollutionGraph({
+            ...airPollutionGraph,
+            series
+        })
+
+    }
+
     return (
         <div>
             <TopSection />
-            <div className="flex flex-col max-w-[1280px]">
+            <div className="flex gap-4 flex-col max-w-[1280px]">
                 <div className="flex gap-4">
                     <div className="w-50">
                         <Card>
                             <CardBody>
-                                <h6 className="font-bold ml-4">Forecast for next five days</h6>
+                                <h6 className="font-bold ml-4 mb-4">Forecast for next five days</h6>
                                 {ForecastTable(forecastDataTable, isGetPollutionPending)}
                             </CardBody>
                         </Card>
@@ -288,12 +362,20 @@ const DashboardContainer = (props: IDashboardContainerProps) => {
                     <div className="w-50">
                         <Card className="h-full">
                             <CardBody>
-                                <h6 className="font-bold ml-4">Graph forecast for next five days</h6>
-                                {forecastDataGraph && <ReactECharts className="min-h-350 h-full" option={forecastDataGraph} />}
+                                <h6 className="font-bold ml-4 mb-4">Graph forecast for next five days</h6>
+                                <ReactECharts className="min-h-350 h-full" option={forecastDataGraph} />
                             </CardBody>
                         </Card>
 
                     </div>
+                </div>
+                <div>
+                    <Card className="h-full">
+                        <CardBody>
+                            <h6 className="font-bold ml-4 mb-4">Air pollution in the last 3 months</h6>
+                            <ReactECharts className="min-h-350 h-full" option={airPollutionGraph} />
+                        </CardBody>
+                    </Card>
                 </div>
             </div>
         </div>
