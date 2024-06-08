@@ -6,6 +6,7 @@ import { useMutation } from '@tanstack/react-query';
 import WeatherService from "@/services/weatherService";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import ReactECharts from 'echarts-for-react';
 
 const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const CURRENT_HOUR_FILTER = "09:00:00"
@@ -49,7 +50,7 @@ const TopSection = () => {
 
 const ForecastTable = (data: any, loading: boolean) => {
     return (
-        <Table>
+        <Table className="min-h-350 h-full">
             <TableHeader>
                 <TableColumn className='min-w-16'>{""}</TableColumn>
                 <TableColumn className='min-w-16'>{""}</TableColumn>
@@ -81,7 +82,7 @@ const ForecastTable = (data: any, loading: boolean) => {
                             <TableCell>{item.temp_min}°C</TableCell>
                             <TableCell>{item.temp_max}°C</TableCell>
                             <TableCell>{item.humidity}%</TableCell>
-                            <TableCell>{Math.round(item.pop * 100)}%</TableCell>
+                            <TableCell>{item.pop}%</TableCell>
                         </TableRow>
                     ))
                 }
@@ -95,6 +96,59 @@ const DashboardContainer = (props: IDashboardContainerProps) => {
     const weatherService = new WeatherService()
     const [airPollution, setAirPollution] = useState({})
     const [forecastDataTable, setForecastDataTable] = useState<[]>()
+    const [forecastDataGraph, setForecastDataGraph] = useState<any>({
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross'
+            }
+        },
+        legend: {
+            data: ['Precipitation', 'Temperature']
+        },
+        xAxis: [
+            {
+                type: 'category',
+                axisTick: {
+                    alignWithLabel: true
+                },
+                data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value',
+                name: 'Precipitation',
+                position: 'right',
+                alignTicks: true,
+                offset: 0,
+                axisLine: {
+                    show: true,
+                    lineStyle: {
+                        color: 'lightblue'
+                    }
+                },
+                axisLabel: {
+                    formatter: '{value} %'
+                }
+            },
+            {
+                type: 'value',
+                name: '',
+                position: 'left',
+                alignTicks: true,
+                axisLine: {
+                    show: true,
+                    lineStyle: {
+                        color: 'lightgray'
+                    }
+                },
+                axisLabel: {
+                    formatter: '{value} °C'
+                }
+            }
+        ]
+    })
 
     const {
         mutate: getAirPollution,
@@ -143,7 +197,7 @@ const DashboardContainer = (props: IDashboardContainerProps) => {
                     day,
                     weather,
                     humidity: main.humidity,
-                    pop,
+                    pop: Math.round(pop * 100),
                     feels_like: main.feels_like,
                     clouds: clouds.all,
                     temp_min: main.temp_min,
@@ -154,7 +208,7 @@ const DashboardContainer = (props: IDashboardContainerProps) => {
                 if (dt_txt.includes(CURRENT_HOUR_FILTER)) {
                     transformData[day].weather = weather
                     transformData[day].humidity = main.humidity,
-                        transformData[day].pop = pop,
+                        transformData[day].pop = Math.round(pop * 100),
                         transformData[day].temp = main.temp
                     transformData[day].clouds = clouds.all
                     transformData[day].feels_like = main.feels_like
@@ -173,6 +227,48 @@ const DashboardContainer = (props: IDashboardContainerProps) => {
                 temp_max: toCelcious(item.temp_max)
             }
         })
+
+        let dataGraph: any = {}
+        data.forEach((item: any) => {
+            Object.keys(item).forEach(key => {
+                if (!dataGraph[key]) {
+                    dataGraph[key] = [item[key]]
+                } else {
+                    dataGraph[key].push(item[key])
+                }
+            })
+        })
+
+        let series: any = [
+            {
+                name: 'Precipitation',
+                type: 'line',
+                areaStyle: {},
+                yAxisIndex: 0,
+                data: dataGraph['pop']
+            },
+            {
+                name: 'Temperature',
+                type: 'line',
+                yAxisIndex: 1,
+                data: dataGraph['temp']
+            }
+        ]
+
+        setForecastDataGraph({
+            ...forecastDataGraph,
+            xAxis: [
+                {
+                    type: 'category',
+                    axisTick: {
+                        alignWithLabel: true
+                    },
+                    data: dataGraph['day']
+                }
+            ],
+            series
+        })
+
         setForecastDataTable(data)
     }
 
@@ -188,6 +284,15 @@ const DashboardContainer = (props: IDashboardContainerProps) => {
                                 {ForecastTable(forecastDataTable, isGetPollutionPending)}
                             </CardBody>
                         </Card>
+                    </div>
+                    <div className="w-50">
+                        <Card className="h-full">
+                            <CardBody>
+                                <h6 className="font-bold ml-4">Graph forecast for next five days</h6>
+                                {forecastDataGraph && <ReactECharts className="min-h-350 h-full" option={forecastDataGraph} />}
+                            </CardBody>
+                        </Card>
+
                     </div>
                 </div>
             </div>
