@@ -6,14 +6,14 @@
   --primary-color: #3b77b9;
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --background-end-rgb: 35, 34, 58;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --foreground-rgb: 255, 255, 255;
     --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    --background-end-rgb: 35, 34, 58;
   }
 }
 
@@ -40,4 +40,8 @@ body {
 .sidebar-btn-menu--active {
   color: var(--primary-color);
   border-right: 1px solid var(--primary-color);
+}
+
+.w-50 {
+  width: 50%;
 }

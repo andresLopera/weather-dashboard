@@ -39,7 +39,7 @@ class WeatherService {
     try {
       /* let response = await axios.get(`${process.env.WEATHER_END_POINT}/forecast?lat=${lat}&lon=${lon}&appid=${process.env.WEATHER_API_KEY}`) */
       let response: AxiosResponse<Forecast> = await axios.get(
-        `http://api.openweathermap.org/data/2.5/forecast?lat=44.34&lon=10.99&appid=941989c630db569c05cf3278218b2974`
+        `http://api.openweathermap.org/data/2.5/forecast?lat=10.96854&lon=-74.78132&appid=941989c630db569c05cf3278218b2974`
       )
       return response.data
     } catch (error) {
