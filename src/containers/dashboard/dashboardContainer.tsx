@@ -385,7 +385,6 @@ const DashboardContainer = (props: IDashboardContainerProps) => {
         <div>
             {TopSection(selectedCountry, handleSelectedCountry)}
             <div className="flex gap-4 flex-col max-w-[1280px]">
-                {selectedCountry}
                 <div className="flex gap-4">
                     <div className="w-50">
                         <Card>
