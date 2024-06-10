@@ -94,7 +94,7 @@ const ForecastTable = (data: any, loading: boolean) => {
                 ))}
                 {
                     data && data.map((item: any, i: number) => (
-                        <TableRow key={i}>
+                        <TableRow className={loading ? 'hidden' : ''} key={i}>
                             <TableCell>{item.day}</TableCell>
                             <TableCell>{getWeatherIcon(item.weather)}</TableCell>
                             <TableCell>{item.temp}°C</TableCell>
