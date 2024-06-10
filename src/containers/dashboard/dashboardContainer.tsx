@@ -1,15 +1,17 @@
 'use client'
 
-import { Button, Card, CardBody, Input, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Skeleton } from "@nextui-org/react"
+import { Button, Card, CardBody, Input, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Skeleton, Select, SelectItem, Avatar } from "@nextui-org/react"
 import { MdOutlineBookmark, MdOutlineImageSearch, MdOutlineSearch } from "react-icons/md"
 import { useMutation } from '@tanstack/react-query';
 import WeatherService from "@/services/weatherService";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import ReactECharts from 'echarts-for-react';
+import countries from "@/lib/data/countries";
 
 const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const CURRENT_HOUR_FILTER = "09:00:00"
+const DEFAULT_COUNTRY_CODE = 'CO'
 
 function getDayOfWeek(date: string) {
     const dayOfWeekNumber = new Date(date).getDay();
@@ -30,12 +32,30 @@ interface IDashboardContainerProps {
 
 }
 
-const TopSection = () => {
+const TopSection = (value: string, handleOnChange: any) => {
     return (
         <div className='flex justify-between mb-5'>
             <div className="flex flex-1 justify-end max-w-[1280px] gap-2">
-                <div className=" flex gap-2">
-                    <Input className="dark:bg-red" type="text" label="" placeholder="Search KPI" endContent={<MdOutlineSearch className="text-2x" />} />
+                <div className=" flex gap-2 items-center">
+                    <div className="flex min-w-[200px] max-w-xs flex-col gap-2">
+                        <Select
+                            items={countries}
+                            label="Selected country"
+                            className="max-w-xs"
+                            selectedKeys={[value]}
+                            onChange={handleOnChange}
+                        >
+                            {(country: Country) => (
+                                <SelectItem key={country.code} textValue={`${country.emoji} ${country.name}`}>
+                                    <div className="flex gap-2 items-center">
+                                        <div className="flex flex-col">
+                                            <span className="text-tiny text-default-400">{`${country.emoji} ${country.name}`}</span>
+                                        </div>
+                                    </div>
+                                </SelectItem>
+                            )}
+                        </Select>
+                    </div>
                     <Button isIconOnly color="default" aria-label="Like">
                         <MdOutlineImageSearch />
                     </Button>
@@ -94,6 +114,9 @@ const ForecastTable = (data: any, loading: boolean) => {
 
 const DashboardContainer = (props: IDashboardContainerProps) => {
     const weatherService = new WeatherService()
+    const [longitude, setLongitude] = useState<number>()
+    const [latitude, setLatitude] = useState<number>()
+    const [selectedCountry, setSelectedCountry] = useState(DEFAULT_COUNTRY_CODE)
     const [airPollutionGraph, setAirPollutionGraph] = useState({
         tooltip: {
             trigger: 'axis',
@@ -182,7 +205,7 @@ const DashboardContainer = (props: IDashboardContainerProps) => {
         isPending: isGetPollutionPending,
     } = useMutation({
         mutationFn: () => {
-            return weatherService.getAirPollution({ lat: '', lon: '', start: '', end: '' })
+            return weatherService.getAirPollution({ lat: latitude, lon: longitude, start: '', end: '' })
         },
         onSuccess: (result: any) => {
             proccessDataAirPollution(result)
@@ -197,7 +220,7 @@ const DashboardContainer = (props: IDashboardContainerProps) => {
         isPending: isForecastPending,
     } = useMutation({
         mutationFn: () => {
-            return weatherService.getForecast({ lat: '', lon: '' })
+            return weatherService.getForecast({ lat: latitude, lon: longitude })
         },
         onSuccess: (result: any) => {
             proccessDataForecast(result)
@@ -207,10 +230,22 @@ const DashboardContainer = (props: IDashboardContainerProps) => {
         },
     });
 
-    useEffect(() => {
-        getAirPollution()
-        getForecast()
-    }, [])
+    const handleSelectedCountry = (e: any) => {
+        setSelectedCountry(e.target.value);
+        loadData()
+    };
+
+    useEffect(loadData, [])
+
+    function loadData() {
+        let country: Country = countries.findLast(country => country.code == DEFAULT_COUNTRY_CODE) as any
+        if (country) {
+            setLatitude(country.latitude)
+            setLongitude(country.longitude)
+            getAirPollution()
+            getForecast()
+        }
+    }
 
 
     const proccessDataForecast = (forecast: any) => {
@@ -348,8 +383,9 @@ const DashboardContainer = (props: IDashboardContainerProps) => {
 
     return (
         <div>
-            <TopSection />
+            {TopSection(selectedCountry, handleSelectedCountry)}
             <div className="flex gap-4 flex-col max-w-[1280px]">
+                {selectedCountry}
                 <div className="flex gap-4">
                     <div className="w-50">
                         <Card>
