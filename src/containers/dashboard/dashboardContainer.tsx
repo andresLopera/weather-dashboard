@@ -232,13 +232,13 @@ const DashboardContainer = (props: IDashboardContainerProps) => {
 
     const handleSelectedCountry = (e: any) => {
         setSelectedCountry(e.target.value);
-        loadData()
+        loadData(e.target.value)
     };
 
-    useEffect(loadData, [])
+    useEffect(() => loadData(DEFAULT_COUNTRY_CODE), [])
 
-    function loadData() {
-        let country: Country = countries.findLast(country => country.code == DEFAULT_COUNTRY_CODE) as any
+    function loadData(countryCode: String) {
+        let country: Country = countries.findLast(country => country.code == countryCode) as any
         if (country) {
             setLatitude(country.latitude)
             setLongitude(country.longitude)
