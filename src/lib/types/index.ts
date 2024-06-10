@@ -1,4 +1,3 @@
-
 // Define interfaces for the response data
 interface AirPollution {
   coord: { lon: number; lat: number }
@@ -58,4 +57,12 @@ interface Forecast {
     sunrise: number
     sunset: number
   }
+}
+
+interface Country {
+  code: string
+  name: string
+  latitude: number
+  longitude: number
+  emoji: string
 }
