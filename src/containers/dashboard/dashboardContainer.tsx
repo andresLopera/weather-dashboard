@@ -12,6 +12,8 @@ import countries from "@/lib/data/countries";
 const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const CURRENT_HOUR_FILTER = "09:00:00"
 const DEFAULT_COUNTRY_CODE = 'CO'
+const DEFAULT_LATITUDE = 4.5709
+const DEFAULT_LONGITUDE = -74.2973
 
 function getDayOfWeek(date: string) {
     const dayOfWeekNumber = new Date(date).getDay();
@@ -114,8 +116,8 @@ const ForecastTable = (data: any, loading: boolean) => {
 
 const DashboardContainer = (props: IDashboardContainerProps) => {
     const weatherService = new WeatherService()
-    const [longitude, setLongitude] = useState<number>()
-    const [latitude, setLatitude] = useState<number>()
+    const [longitude, setLongitude] = useState<number>(DEFAULT_LONGITUDE)
+    const [latitude, setLatitude] = useState<number>(DEFAULT_LATITUDE)
     const [selectedCountry, setSelectedCountry] = useState(DEFAULT_COUNTRY_CODE)
     const [airPollutionGraph, setAirPollutionGraph] = useState({
         tooltip: {
